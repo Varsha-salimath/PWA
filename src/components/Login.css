@@ -1,0 +1,278 @@
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 100svh;
+  width: 100%;
+  background-color: #fcf9f8;
+}
+
+.login__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.login__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 375px;
+}
+
+.login__header {
+  padding-bottom: 80px;
+}
+
+.login__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login__logo-wrap {
+  padding-bottom: 24px;
+}
+
+.login__logo {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.login__logo-img {
+  width: 100%;
+  height: 60%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.login__title {
+  margin: 0;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+  color: #1c1b1b;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  padding-bottom: 16px;
+}
+
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.login__label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.65px;
+  color: #564335;
+}
+
+.login__input {
+  width: 100%;
+  height: 48px;
+  padding: 14px 25px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #ddc1af;
+  border-radius: 8px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: #1c1b1b;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.login__input::placeholder {
+  color: #6b7280;
+}
+
+.login__input:focus {
+  border-color: #f5820a;
+}
+
+.login__input--password {
+  padding-right: 56px;
+}
+
+.login__password-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.login__toggle-password {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 15px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.login__eye-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.login__remember {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.login__toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.login__toggle {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.login__toggle-track {
+  display: block;
+  width: 40px;
+  height: 24px;
+  background: #e5e2e1;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.login__toggle--on .login__toggle-track {
+  background: #f5820a;
+}
+
+.login__toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px;
+  transition: transform 0.2s ease;
+}
+
+.login__toggle--on .login__toggle-knob {
+  transform: translateX(16px);
+  border-color: #f5820a;
+}
+
+.login__toggle-text {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.65px;
+  color: #564335;
+  white-space: nowrap;
+}
+
+.login__submit {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5820a;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.login__submit:hover {
+  background: #e07509;
+}
+
+.login__submit:active {
+  background: #cc6908;
+}
+
+.login__support {
+  padding-top: 80px;
+}
+
+.login__support-text {
+  margin: 0;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 24px;
+  color: #564335;
+  text-align: center;
+}
+
+.login__support-link {
+  font-weight: 700;
+  color: #f5820a;
+  text-decoration: none;
+}
+
+.login__support-link:hover {
+  text-decoration: underline;
+}
+
+.login__footer {
+  padding: 24px 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.login__copyright {
+  margin: 0;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.65px;
+  color: #564335;
+  text-align: center;
+}

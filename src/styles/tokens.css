@@ -1,0 +1,36 @@
+:root {
+  --bg: #fcf9f8;
+  --surface: #ffffff;
+  --surface-muted: #f6f3f2;
+  --border: #ddc1af;
+  --border-light: rgba(221, 193, 175, 0.3);
+  --text-primary: #1c1b1b;
+  --text-secondary: #564335;
+  --text-muted: #6b7280;
+  --orange: #f5820a;
+  --orange-dark: #934b00;
+  --orange-active: #592b00;
+  --orange-light: rgba(245, 130, 10, 0.1);
+  --red: #ba1a1a;
+  --red-light: rgba(186, 26, 26, 0.1);
+  --green: #107c10;
+  --green-bright: #22c55e;
+  --green-light: rgba(34, 197, 94, 0.1);
+  --blue: #194fd5;
+  --blue-light: rgba(62, 106, 239, 0.1);
+  --amber: #f59e0b;
+  --amber-light: rgba(245, 158, 11, 0.1);
+  --gray-badge: #464747;
+  --gray-badge-light: rgba(70, 71, 71, 0.1);
+  --avatar-bg: #e5e2e1;
+  --progress-bg: #f0eded;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-pill: 9999px;
+  --shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --header-height: 64px;
+  --nav-height: 80px;
+  --font: 'Nunito Sans', system-ui, sans-serif;
+}
