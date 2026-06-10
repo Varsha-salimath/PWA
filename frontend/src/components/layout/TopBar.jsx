@@ -1,0 +1,56 @@
+import {
+  IconBack,
+  IconBell,
+  IconMenu,
+  IconMore,
+  IconRefresh,
+} from '../icons/Icons'
+import './layout.css'
+
+export default function TopBar({
+  variant = 'menu',
+  showRefresh = false,
+  showMore = false,
+  showBell = false,
+  onBack,
+}) {
+  const handleBack = () => {
+    if (onBack) onBack()
+    else window.history.back()
+  }
+
+  return (
+    <header className="topbar">
+      <div className="topbar__left">
+        {variant === 'menu' && (
+          <button type="button" className="topbar__icon-btn topbar__menu-btn" aria-label="Menu">
+            <IconMenu />
+          </button>
+        )}
+        {variant === 'back' && (
+          <button type="button" className="topbar__icon-btn" onClick={handleBack} aria-label="Go back">
+            <IconBack />
+          </button>
+        )}
+        <img src="/assets/logo.png" alt="WizKlub Futurz" className="topbar__logo" />
+      </div>
+      <div className="topbar__right">
+        {showRefresh && (
+          <button type="button" className="topbar__icon-btn" aria-label="Refresh">
+            <IconRefresh />
+          </button>
+        )}
+        {showBell && (
+          <button type="button" className="topbar__icon-btn" aria-label="Notifications">
+            <IconBell />
+          </button>
+        )}
+        {showMore && (
+          <button type="button" className="topbar__icon-btn" aria-label="More options">
+            <IconMore />
+          </button>
+        )}
+      </div>
+    </header>
+  )
+}

@@ -1,0 +1,51 @@
+import Login from './components/Login'
+import { RequireAuth } from './context/AuthContext.jsx'
+import Dashboard from './pages/Dashboard'
+import BatchSelection from './pages/BatchSelection'
+import Profile from './pages/Profile'
+import SchoolsList from './pages/SchoolsList'
+import StudentList from './pages/StudentList'
+import StudentProfile from './pages/StudentProfile'
+import { Router, matchPath, usePath } from './router'
+
+function AppRoutes() {
+  const path = usePath()
+
+  if (path === '/login') return <Login />
+
+  const batchRoute = matchPath(path, '/schools/:schoolId/batches')
+  const studentsRoute = matchPath(path, '/batches/:batchId/students')
+  const studentRoute = matchPath(path, '/students/:studentId')
+
+  const isKnownRoute =
+    path === '/dashboard' ||
+    path === '/home' ||
+    path === '/schools' ||
+    path === '/profile' ||
+    path === '/' ||
+    batchRoute ||
+    studentsRoute ||
+    studentRoute
+
+  return (
+    <RequireAuth>
+      {!isKnownRoute && <Dashboard />}
+      {(path === '/dashboard' || path === '/home' || path === '/') && <Dashboard />}
+      {path === '/schools' && <SchoolsList />}
+      {batchRoute && <BatchSelection schoolId={batchRoute.schoolId} />}
+      {studentsRoute && <StudentList batchId={studentsRoute.batchId} />}
+      {studentRoute && <StudentProfile studentId={studentRoute.studentId} />}
+      {path === '/profile' && <Profile />}
+    </RequireAuth>
+  )
+}
+
+function App() {
+  return (
+    <Router>
+      <AppRoutes />
+    </Router>
+  )
+}
+
+export default App
