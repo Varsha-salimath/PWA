@@ -368,6 +368,36 @@
   transition: background 0.2s var(--ease-out);
 }
 
+.list-row-wrap {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.list-row-wrap .list-row.list-row__main {
+  flex: 1;
+  min-width: 0;
+  border-bottom: none;
+}
+
+.list-row__upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  flex-shrink: 0;
+  border: none;
+  border-left: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--brand);
+  cursor: pointer;
+  transition: background 0.2s var(--ease-out);
+}
+
+.list-row__upload-btn:hover {
+  background: var(--brand-soft);
+}
+
 .list-row:hover {
   background: var(--brand-soft);
 }

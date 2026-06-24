@@ -1,8 +1,18 @@
+import path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  envDir: path.resolve(__dirname, '..'),
+  server: {
+    host: true,
+    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.ngrok.app'],
+    proxy: {
+      '/api': { target: 'http://localhost:3001', changeOrigin: true },
+      '/uploads': { target: 'http://localhost:3001', changeOrigin: true },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

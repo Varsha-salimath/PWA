@@ -1,14 +1,13 @@
 import {
   IconBack,
   IconBell,
-  IconMenu,
   IconMore,
   IconRefresh,
 } from '../icons/Icons'
 import './layout.css'
 
 export default function TopBar({
-  variant = 'menu',
+  variant,
   showRefresh = false,
   showMore = false,
   showBell = false,
@@ -22,11 +21,6 @@ export default function TopBar({
   return (
     <header className="topbar">
       <div className="topbar__left">
-        {variant === 'menu' && (
-          <button type="button" className="topbar__icon-btn topbar__menu-btn" aria-label="Menu">
-            <IconMenu />
-          </button>
-        )}
         {variant === 'back' && (
           <button type="button" className="topbar__icon-btn" onClick={handleBack} aria-label="Go back">
             <IconBack />

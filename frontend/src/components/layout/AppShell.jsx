@@ -11,7 +11,7 @@ export default function AppShell({
   showFab = false,
   fabIcon = 'camera',
   activeTab,
-  topBarVariant = 'menu',
+  topBarVariant,
   showRefresh = false,
   showMore = false,
   showBell = false,

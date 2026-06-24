@@ -1,18 +1,119 @@
 /**
  * Shared API client — matches /api/teacher/* contract from tech spec.
- * Web PWA and future native/webview both consume this module.
- * T0: mockStore backend. Swap implementation when real API is ready.
+ * Set VITE_USE_MOCK=false to use the real backend.
  */
 
-import { getBatchCompletion, getStudentCompletion } from '../lib/completion'
-import { validateUploadFile } from '../lib/uploads'
-import { HEALTH_TAG_LABELS } from './constants'
-import { mockStore } from './mockStore'
+import { validateGroupPhotoFile, validateUploadFile } from '../lib/uploads'
 
-const USE_MOCK = true
+const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
-function enrichBatches(batchPayload) {
-  const uploads = mockStore.getUploads()
+let authToken = null
+let refreshToken = null
+let isRefreshing = false
+let refreshPromise = null
+
+function setAuthToken(token) {
+  authToken = token
+}
+
+function setRefreshToken(token) {
+  refreshToken = token
+}
+
+async function tryRefresh() {
+  if (!authToken || !refreshToken) return false
+  if (isRefreshing) return refreshPromise
+
+  isRefreshing = true
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/teacher/refresh`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data.token) return false
+
+      authToken = data.token
+      refreshToken = data.refresh_token ?? refreshToken
+
+      const SESSION_KEY = 'teacher_session'
+      const saved = localStorage.getItem(SESSION_KEY)
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          parsed.token = authToken
+          parsed.refresh_token = refreshToken
+          localStorage.setItem(SESSION_KEY, JSON.stringify(parsed))
+        } catch { /* ignore */ }
+      }
+
+      return true
+    } catch {
+      return false
+    } finally {
+      isRefreshing = false
+      refreshPromise = null
+    }
+  })()
+
+  return refreshPromise
+}
+
+async function request(path, options = {}) {
+  const headers = { ...(options.headers ?? {}) }
+
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`
+  }
+
+  if (options.body && !(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json'
+  }
+
+  let response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  })
+
+  if (response.status === 401 && refreshToken) {
+    const refreshed = await tryRefresh()
+    if (refreshed) {
+      headers.Authorization = `Bearer ${authToken}`
+      response = await fetch(`${API_BASE}${path}`, { ...options, headers })
+    }
+  }
+
+  if (response.status === 204) {
+    return { ok: true, status: 204 }
+  }
+
+  const data = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      status: response.status,
+      error: data.error ?? 'Request failed.',
+      ...data,
+    }
+  }
+
+  return { ok: true, status: response.status, data }
+}
+
+async function loadMockStore() {
+  const { mockStore } = await import('./mockStore')
+  const { getBatchCompletion, getStudentCompletion } = await import('../lib/completion')
+  const { HEALTH_TAG_LABELS } = await import('./constants')
+  return { mockStore, getBatchCompletion, getStudentCompletion, HEALTH_TAG_LABELS }
+}
+
+function enrichBatches(batchPayload, getBatchCompletion, uploads, HEALTH_TAG_LABELS) {
   return {
     ...batchPayload,
     batches: batchPayload.batches.map((batch) => {
@@ -29,8 +130,7 @@ function enrichBatches(batchPayload) {
   }
 }
 
-function enrichStudentDetail(detail) {
-  const uploads = mockStore.getUploads()
+function enrichStudentDetail(detail, getStudentCompletion, uploads) {
   const completion = getStudentCompletion(uploads, detail.student.id)
 
   return {
@@ -53,68 +153,222 @@ function enrichStudentDetail(detail) {
 
 export const api = {
   async login(user_id, password) {
-    if (!USE_MOCK) throw new Error('Real API not configured.')
-    const result = mockStore.login(user_id, password)
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      const result = mockStore.login(user_id, password)
+      if (!result.ok) return { ok: false, error: result.error }
+      return { ok: true, teacher: result.teacher }
+    }
+
+    const result = await request('/api/teacher/login', {
+      method: 'POST',
+      body: JSON.stringify({ user_id, password }),
+    })
+
     if (!result.ok) return { ok: false, error: result.error }
-    return { ok: true, teacher: result.teacher }
+
+    setAuthToken(result.data.token)
+    setRefreshToken(result.data.refresh_token ?? null)
+    return {
+      ok: true,
+      teacher: result.data.teacher,
+      token: result.data.token,
+      refresh_token: result.data.refresh_token ?? null,
+    }
   },
 
   async logout() {
-    mockStore.logout()
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      mockStore.logout()
+    } else {
+      await request('/api/teacher/logout', { method: 'POST' })
+      setAuthToken(null)
+      setRefreshToken(null)
+    }
     return { ok: true }
   },
 
   async getMe() {
-    return mockStore.getMe()
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      return mockStore.getMe()
+    }
+
+    const result = await request('/api/teacher/me')
+    if (!result.ok) return null
+    return result.data
   },
 
-  restoreSession(teacherId) {
-    return mockStore.restoreSession(teacherId)
+  restoreSession(session) {
+    if (USE_MOCK) {
+      return import('./mockStore').then(({ mockStore }) => mockStore.restoreSession(session.id))
+    }
+
+    if (session?.token) {
+      setAuthToken(session.token)
+      setRefreshToken(session?.refresh_token ?? null)
+      return api.getMe()
+    }
+
+    return Promise.resolve(null)
   },
 
   async getDashboard() {
-    return mockStore.getDashboard()
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      return mockStore.getDashboard()
+    }
+
+    const result = await request('/api/teacher/dashboard')
+    return result.ok ? result.data : null
   },
 
   async getSchools() {
-    return mockStore.getSchools()
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      return mockStore.getSchools()
+    }
+
+    const result = await request('/api/teacher/schools')
+    return result.ok ? result.data : null
   },
 
   async getBatches(schoolId) {
-    const result = mockStore.getBatches(schoolId)
-    if (!result) return null
-    if (result.forbidden) return { forbidden: true }
-    return enrichBatches(result)
+    if (USE_MOCK) {
+      const { mockStore, getBatchCompletion, HEALTH_TAG_LABELS } = await loadMockStore()
+      const batchResult = mockStore.getBatches(schoolId)
+      if (!batchResult) return null
+      if (batchResult.forbidden) return { forbidden: true }
+      return enrichBatches(batchResult, getBatchCompletion, mockStore.getUploads(), HEALTH_TAG_LABELS)
+    }
+
+    const result = await request(`/api/teacher/schools/${schoolId}/batches`)
+    if (result.status === 403) return { forbidden: true }
+    if (!result.ok) return null
+    return result.data
   },
 
   async getStudents(batchId, filter = 'all') {
-    const result = mockStore.getStudents(batchId, filter)
-    if (!result) return null
-    if (result.forbidden) return { forbidden: true }
-    return result
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      const studentResult = mockStore.getStudents(batchId, filter)
+      if (!studentResult) return null
+      if (studentResult.forbidden) return { forbidden: true }
+      return studentResult
+    }
+
+    const result = await request(`/api/teacher/batches/${batchId}/students?filter=${filter}`)
+    if (result.status === 403) return { forbidden: true }
+    if (!result.ok) return null
+    return result.data
   },
 
   async getStudent(studentId) {
-    const result = mockStore.getStudent(studentId)
-    if (!result) return null
-    if (result.forbidden) return { forbidden: true }
-    return enrichStudentDetail(result)
+    if (USE_MOCK) {
+      const { mockStore, getStudentCompletion } = await loadMockStore()
+      const detail = mockStore.getStudent(studentId)
+      if (!detail) return null
+      if (detail.forbidden) return { forbidden: true }
+      return enrichStudentDetail(detail, getStudentCompletion, mockStore.getUploads())
+    }
+
+    const result = await request(`/api/teacher/students/${studentId}`)
+    if (result.status === 403) return { forbidden: true }
+    if (!result.ok) return null
+    return result.data
   },
 
   async uploadMedia(studentId, category, file) {
     const validation = validateUploadFile(file)
     if (!validation.ok) return { ok: false, status: 415, error: validation.error }
 
-    const previewUrl = URL.createObjectURL(file)
-    const result = mockStore.addUpload(studentId, category, file, previewUrl)
-    return result
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      const previewUrl = URL.createObjectURL(file)
+      return mockStore.addUpload(studentId, category, file, previewUrl)
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('category', category)
+
+    const result = await request(`/api/teacher/students/${studentId}/uploads`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!result.ok) return { ok: false, status: result.status, error: result.error }
+    return { ok: true, status: result.status, upload: result.data.upload }
   },
 
   async deleteUpload(uploadId) {
-    return mockStore.deleteUpload(uploadId)
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      return mockStore.deleteUpload(uploadId)
+    }
+
+    const result = await request(`/api/teacher/uploads/${uploadId}`, { method: 'DELETE' })
+    if (!result.ok) return { ok: false, status: result.status, error: result.error }
+    return { ok: true, status: 204 }
   },
 
   async submitCategory(studentId, category) {
-    return mockStore.submitCategory(studentId, category)
+    if (USE_MOCK) {
+      const { mockStore } = await loadMockStore()
+      return mockStore.submitCategory(studentId, category)
+    }
+
+    const result = await request(
+      `/api/teacher/students/${studentId}/categories/${category}/submit`,
+      { method: 'POST' },
+    )
+
+    if (!result.ok) return { ok: false, status: result.status, error: result.error }
+    return {
+      ok: true,
+      status: result.status,
+      submitted_count: result.data.submitted_count,
+      submitted_at: result.data.submitted_at,
+    }
+  },
+
+  async uploadBatchGroupPhoto(file, batchId) {
+    const validation = validateGroupPhotoFile(file)
+    if (!validation.ok) return { ok: false, status: 415, error: validation.error }
+
+    if (!batchId) return { ok: false, status: 400, error: 'Batch is required.' }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const result = await request(`/api/teacher/batches/${batchId}/group-photo`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!result.ok) return { ok: false, status: result.status, error: result.error }
+    return { ok: true, status: result.status, upload: result.data.upload }
+  },
+
+  async uploadBatchGroupPhotos(files, batchId) {
+    const results = []
+    for (const file of files) {
+      const result = await api.uploadBatchGroupPhoto(file, batchId)
+      results.push(result)
+    }
+    return results
+  },
+
+  async getBatchGroupPhotos(batchId) {
+    const result = await request(`/api/teacher/batches/${batchId}/group-photos`)
+    if (!result.ok) return []
+    return result.data.uploads ?? []
+  },
+
+  async deleteBatchGroupPhoto(uploadId) {
+    const result = await request(`/api/teacher/batch-uploads/${uploadId}`, { method: 'DELETE' })
+    if (!result.ok) return { ok: false, status: result.status, error: result.error }
+    return { ok: true, status: 204 }
   },
 }

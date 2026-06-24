@@ -37,7 +37,7 @@ export default function BatchSelection({ schoolId }) {
   }
 
   return (
-    <AppShell topBarVariant="back" showMore activeTab="schools" className="page-batches">
+    <AppShell topBarVariant="back" activeTab="schools" className="page-batches">
       <div className="page animate-in">
         <PageHeader
           eyebrow={data.school.name}

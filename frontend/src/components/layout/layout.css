@@ -76,10 +76,9 @@
   height: 34px;
   width: auto;
   object-fit: contain;
-}
-
-.topbar__menu-btn {
-  display: flex;
+  cursor: default !important;
+  pointer-events: none !important;
+  user-select: none;
 }
 
 /* ── Bottom nav (mobile) ── */
@@ -269,10 +268,6 @@
     background: transparent;
     backdrop-filter: none;
     border-bottom: none;
-  }
-
-  .topbar__menu-btn {
-    display: none;
   }
 
   .topbar__logo {

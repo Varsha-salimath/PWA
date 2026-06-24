@@ -215,6 +215,11 @@
   color: var(--text-secondary);
 }
 
+.profile-hero__quick-upload {
+  width: 100%;
+  margin-top: 12px;
+}
+
 .completion-ring--lg {
   width: 44px;
   height: 44px;
@@ -251,9 +256,15 @@
 }
 
 .profile-user__avatar {
-  width: 48px;
-  height: 48px;
-  font-size: 15px;
+  width: 52px;
+  height: 52px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--orange-light);
+  flex-shrink: 0;
 }
 
 .profile-user__name {

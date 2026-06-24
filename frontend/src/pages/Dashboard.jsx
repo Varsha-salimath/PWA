@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import { api } from '../api/client'
 import AppShell from '../components/layout/AppShell'
 import LoadingScreen from '../components/ui/LoadingScreen'
@@ -28,8 +29,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     api.getDashboard().then((result) => {
-      if (!result) setError('Unable to load dashboard.')
-      else setData(result)
+      if (!result) {
+        setError('Unable to load dashboard.')
+        toast.error('Unable to load dashboard')
+      } else {
+        setData(result)
+      }
     })
   }, [])
 
@@ -72,8 +77,8 @@ export default function Dashboard() {
             icon={IconUsers}
           />
           <StatCard
-            label="Videos Uploaded"
-            value={data.stats.videos_uploaded}
+            label="Testimonials Submitted"
+            value={data.stats.testimonials_uploaded}
             tone="blue"
             icon={IconUpload}
           />
@@ -82,7 +87,7 @@ export default function Dashboard() {
             value={data.stats.pending_students}
             tone="danger"
             icon={IconAlert}
-            hint="Below 100% completion"
+            hint="No uploads yet"
           />
         </section>
 

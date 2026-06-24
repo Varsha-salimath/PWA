@@ -118,7 +118,7 @@ export default function CategoryUploadCard({
           <span className="category-card__empty-icon">
             <IconUpload size={18} />
           </span>
-          <span>Add photos or videos, then submit to post them.</span>
+          <span>Add photos / videos, then submit to post them.</span>
         </div>
       )}
 
@@ -126,7 +126,7 @@ export default function CategoryUploadCard({
         ref={inputRef}
         type="file"
         multiple
-        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/tiff,video/mp4,video/quicktime,video/3gpp,video/x-matroska,video/webm,video/x-msvideo,video/x-m4v,.heic,.heif,.mkv,.3gp,.avi,.m4v"
         hidden
         onChange={handleFileChange}
       />
@@ -139,7 +139,7 @@ export default function CategoryUploadCard({
           onClick={() => inputRef.current?.click()}
         >
           <IconUpload size={16} />
-          {uploading ? 'Uploading…' : 'Add photo or video'}
+          {uploading ? 'Uploading…' : 'Add photo / video'}
         </button>
 
         <button

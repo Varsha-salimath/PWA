@@ -1,11 +1,11 @@
-import { MOCK_CREDENTIALS, UPLOAD_STATUS } from './constants'
+import { UPLOAD_STATUS } from './constants'
 
 const teachers = [
   {
     id: 'teacher-1',
-    user_id: MOCK_CREDENTIALS.user_id,
-    password: MOCK_CREDENTIALS.password,
-    full_name: 'Priya Sharma',
+    user_id: 'demo.teacher',
+    password: 'demo',
+    full_name: 'Demo Teacher',
   },
 ]
 
@@ -74,6 +74,22 @@ let uploads = students.flatMap((student, index) => {
 let sessionTeacherId = null
 let uploadCounter = uploads.length
 
+let batchGroupPhotos = {
+  'batch-1': {
+    id: 'batch-photo-1',
+    batch_id: 'batch-1',
+    teacher_id: 'teacher-1',
+    media_type: 'photo',
+    blob_url: '/assets/school-campus.png',
+    blob_key: 'batch-1/group-photo/seed',
+    file_size_bytes: 1024 * 256,
+    upload_source: 'web',
+    status: UPLOAD_STATUS.SUBMITTED,
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    submitted_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+}
+
 function getTeacher() {
   return teachers.find((teacher) => teacher.id === sessionTeacherId) ?? null
 }
@@ -94,6 +110,16 @@ function getBatchById(batchId) {
 
 function getStudentById(studentId) {
   return students.find((student) => student.id === studentId) ?? null
+}
+
+function teacherOwnsBatch(teacherId, batchId) {
+  const batch = getBatchById(batchId)
+  if (!batch) return false
+  return getAssignedSchoolIds(teacherId).includes(batch.school_id)
+}
+
+function getBatchGroupPhoto(batchId) {
+  return batchGroupPhotos[batchId] ?? null
 }
 
 function teacherOwnsStudent(teacherId, studentId) {
@@ -254,6 +280,7 @@ export const mockStore = {
 
     return {
       batch: { id: batch.id, name: batch.name, school_id: batch.school_id },
+      group_photo: getBatchGroupPhoto(batchId),
       students: filtered,
     }
   },
@@ -336,6 +363,32 @@ export const mockStore = {
 
     uploads = [...uploads, record]
     return { ok: true, status: 201, upload: record }
+  },
+
+  uploadBatchGroupPhoto(batchId, file, previewUrl) {
+    const teacher = getTeacher()
+    if (!teacher) return { ok: false, status: 401, error: 'Not authenticated.' }
+    if (!teacherOwnsBatch(teacher.id, batchId)) {
+      return { ok: false, status: 403, error: 'You do not have access to this batch.' }
+    }
+
+    const submittedAt = new Date().toISOString()
+    const record = {
+      id: `batch-photo-${batchId}-${Date.now()}`,
+      batch_id: batchId,
+      teacher_id: teacher.id,
+      media_type: 'photo',
+      blob_url: previewUrl,
+      blob_key: `${batchId}/group-photo/${Date.now()}`,
+      file_size_bytes: file.size,
+      upload_source: 'web',
+      status: UPLOAD_STATUS.SUBMITTED,
+      created_at: submittedAt,
+      submitted_at: submittedAt,
+    }
+
+    batchGroupPhotos = { ...batchGroupPhotos, [batchId]: record }
+    return { ok: true, status: 201, group_photo: record }
   },
 
   deleteUpload(uploadId) {

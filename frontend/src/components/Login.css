@@ -156,10 +156,15 @@
   cursor: pointer;
 }
 
-.login__eye-icon {
-  width: 18px;
-  height: auto;
-  opacity: 0.7;
+.login__toggle-password svg {
+  width: 20px;
+  height: 20px;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.login__toggle-password:hover svg {
+  color: var(--text-primary);
 }
 
 .login__remember {

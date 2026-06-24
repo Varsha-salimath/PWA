@@ -34,19 +34,25 @@ export const ALLOWED_MIME_TYPES = [
   'image/jpeg',
   'image/png',
   'image/webp',
+  'image/heic',
+  'image/heif',
+  'image/gif',
+  'image/tiff',
   'video/mp4',
   'video/quicktime',
+  'video/3gpp',
+  'video/x-matroska',
+  'video/webm',
+  'video/x-msvideo',
+  'video/x-m4v',
 ]
 
-export const MAX_PHOTO_BYTES = 10 * 1024 * 1024
-export const MAX_VIDEO_BYTES = 100 * 1024 * 1024
-
-export const MOCK_CREDENTIALS = {
-  user_id: 'priya.sharma',
-  password: 'wizklub123',
-}
+export const MAX_PHOTO_BYTES = 25 * 1024 * 1024
+export const MAX_VIDEO_BYTES = 500 * 1024 * 1024
 
 export const UPLOAD_STATUS = {
   DRAFT: 'draft',
   SUBMITTED: 'submitted',
 }
+
+export const BATCH_GROUP_PHOTO_LABEL = 'Class group photo / video'

@@ -1,3 +1,5 @@
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import Login from './components/Login'
 import { RequireAuth } from './context/AuthContext.jsx'
 import Dashboard from './pages/Dashboard'
@@ -44,6 +46,17 @@ function App() {
   return (
     <Router>
       <AppRoutes />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </Router>
   )
 }
